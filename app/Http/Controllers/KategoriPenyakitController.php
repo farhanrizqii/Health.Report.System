@@ -3,17 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriPenyakit;
+use App\Models\Role; // Diperlukan untuk RoleMiddleware
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Exports\KategoriPenyakitExport; // Import class Export
+use Maatwebsite\Excel\Facades\Excel; // Import facade Excel
 
 class KategoriPenyakitController extends Controller
 {
     /**
-     * Menampilkan daftar semua kategori penyakit (READ)
+     * Menampilkan daftar semua kategori penyakit (READ - Index) dengan fitur Search.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $penyakits = KategoriPenyakit::orderBy('nama_penyakit')->paginate(10);
+        $query = KategoriPenyakit::orderBy('nama_penyakit');
+
+        // --- LOGIKA PENCARIAN ---
+        if ($request->search) {
+            $search = $request->search;
+            // Mencari berdasarkan nama penyakit atau kode ICD
+            $query->where('nama_penyakit', 'LIKE', '%' . $search . '%')
+                  ->orWhere('kode_icd', 'LIKE', '%' . $search . '%');
+        }
+        // --- AKHIR LOGIKA PENCARIAN ---
+
+        $penyakits = $query->paginate(10)->withQueryString(); 
         return view('kategori_penyakit.index', compact('penyakits'));
+    }
+
+    /**
+     * Menampilkan detail satu kategori penyakit (READ - Show).
+     */
+    public function show(KategoriPenyakit $kategoriPenyakit)
+    {
+        return view('kategori_penyakit.show', compact('kategoriPenyakit'));
     }
 
     /**
@@ -79,5 +102,16 @@ class KategoriPenyakitController extends Controller
 
         return redirect()->route('kategori-penyakit.index')
                          ->with('success', 'Kategori Penyakit berhasil dihapus.');
+    }
+
+    /**
+     * Export data kategori penyakit ke Excel
+     */
+    public function export()
+    {
+        return Excel::download(
+            new KategoriPenyakitExport, 
+            'kategori_penyakit_' . date('Y-m-d_His') . '.xlsx'
+        );
     }
 }

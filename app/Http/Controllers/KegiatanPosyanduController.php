@@ -3,18 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\KegiatanPosyandu;
-use App\Models\Wilayah; // Diperlukan untuk dropdown
+use App\Models\Wilayah;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\KegiatanPosyanduExport;
 
 class KegiatanPosyanduController extends Controller
 {
     /**
-     * Menampilkan daftar semua kegiatan posyandu (READ)
+     * Menampilkan daftar semua kegiatan posyandu (READ - Index) dengan fitur Search.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Eager loading Wilayah untuk menampilkan nama wilayah
-        $kegiatans = KegiatanPosyandu::with('wilayah')->orderBy('tanggal_kegiatan', 'desc')->paginate(10);
+        // PERBAIKAN: Mengurutkan berdasarkan kolom 'tanggal' yang ada di DB
+        $query = KegiatanPosyandu::with('wilayah')->orderBy('tanggal', 'desc');
+
+        // LOGIKA PENCARIAN
+        if ($request->search) {
+            $search = $request->search;
+            $query->where('jenis_kegiatan', 'LIKE', '%' . $search . '%') // Mencari berdasarkan jenis_kegiatan
+                  ->orWhereHas('wilayah', function ($q) use ($search) {
+                      $q->where('kelurahan', 'LIKE', '%' . $search . '%')
+                        ->orWhere('rt', 'LIKE', '%' . $search . '%')
+                        ->orWhere('rw', 'LIKE', '%' . $search . '%');
+                  });
+        }
+
+        $kegiatans = $query->paginate(10)->withQueryString();
         return view('kegiatan_posyandu.index', compact('kegiatans'));
     }
 
@@ -23,7 +39,8 @@ class KegiatanPosyanduController extends Controller
      */
     public function create()
     {
-        $wilayahs = Wilayah::orderBy('nama_wilayah')->get();
+        // Mengurutkan berdasarkan kolom 'kelurahan' yang ada di DB
+        $wilayahs = Wilayah::orderBy('kelurahan')->get(); 
         return view('kegiatan_posyandu.create', compact('wilayahs'));
     }
 
@@ -32,19 +49,28 @@ class KegiatanPosyanduController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        // VALIDASI TOTAL SESUAI MIGRASI (tanpa waktu_mulai/waktu_selesai)
+        $validated = $request->validate([
             'wilayah_id' => 'required|exists:wilayah,id',
-            'nama_kegiatan' => 'required|string|max:150',
-            'tanggal_kegiatan' => 'required|date',
-            'waktu_mulai' => 'nullable|date_format:H:i', // Format jam (misal: 08:00)
-            'waktu_selesai' => 'nullable|date_format:H:i|after:waktu_mulai',
-            'deskripsi' => 'nullable|string',
+            'jenis_kegiatan' => 'required|string|max:255', // Menggunakan kolom jenis_kegiatan
+            'tanggal' => 'required|date', // Menggunakan kolom tanggal
+            'jumlah_peserta' => 'nullable|integer', 
+            'keterangan' => 'nullable|string', // Menggunakan kolom keterangan
         ]);
 
-        KegiatanPosyandu::create($request->all());
+        KegiatanPosyandu::create($validated);
 
         return redirect()->route('kegiatan-posyandu.index')
                          ->with('success', 'Kegiatan Posyandu berhasil dijadwalkan.');
+    }
+    
+    /**
+     * Menampilkan detail satu kegiatan (READ - Show)
+     */
+    public function show(KegiatanPosyandu $kegiatanPosyandu)
+    {
+        $kegiatanPosyandu->load('wilayah');
+        return view('kegiatan_posyandu.show', compact('kegiatanPosyandu'));
     }
 
     /**
@@ -52,7 +78,7 @@ class KegiatanPosyanduController extends Controller
      */
     public function edit(KegiatanPosyandu $kegiatanPosyandu)
     {
-        $wilayahs = Wilayah::orderBy('nama_wilayah')->get();
+        $wilayahs = Wilayah::orderBy('kelurahan')->get();
         return view('kegiatan_posyandu.edit', compact('kegiatanPosyandu', 'wilayahs'));
     }
 
@@ -61,16 +87,16 @@ class KegiatanPosyanduController extends Controller
      */
     public function update(Request $request, KegiatanPosyandu $kegiatanPosyandu)
     {
-        $request->validate([
+        // VALIDASI TOTAL SESUAI MIGRASI
+        $validated = $request->validate([
             'wilayah_id' => 'required|exists:wilayah,id',
-            'nama_kegiatan' => 'required|string|max:150',
-            'tanggal_kegiatan' => 'required|date',
-            'waktu_mulai' => 'nullable|date_format:H:i',
-            'waktu_selesai' => 'nullable|date_format:H:i|after:waktu_mulai',
-            'deskripsi' => 'nullable|string',
+            'jenis_kegiatan' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'jumlah_peserta' => 'nullable|integer',
+            'keterangan' => 'nullable|string',
         ]);
 
-        $kegiatanPosyandu->update($request->all());
+        $kegiatanPosyandu->update($validated);
 
         return redirect()->route('kegiatan-posyandu.index')
                          ->with('success', 'Kegiatan Posyandu berhasil diperbarui.');
@@ -81,7 +107,6 @@ class KegiatanPosyanduController extends Controller
      */
     public function destroy(KegiatanPosyandu $kegiatanPosyandu)
     {
-        // Pengecekan profesional: Jangan hapus jika sudah ada laporan terkait
         if ($kegiatanPosyandu->laporan()->exists()) {
              return redirect()->route('kegiatan-posyandu.index')
                              ->with('error', 'Tidak dapat menghapus kegiatan ini karena sudah terkait dengan Laporan Kesehatan.');
@@ -91,5 +116,14 @@ class KegiatanPosyanduController extends Controller
 
         return redirect()->route('kegiatan-posyandu.index')
                          ->with('success', 'Kegiatan Posyandu berhasil dihapus.');
+    }
+
+    /**
+     * Export data kegiatan posyandu ke Excel
+     */
+    public function export()
+    {
+        $filename = 'Kegiatan_Posyandu_' . now()->format('Ymd_His') . '.xlsx';
+        return Excel::download(new KegiatanPosyanduExport(), $filename);
     }
 }

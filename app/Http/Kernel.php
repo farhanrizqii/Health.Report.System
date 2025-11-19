@@ -8,12 +8,9 @@ class Kernel extends HttpKernel
 {
     /**
      * The application's global HTTP middleware stack.
-     *
-     * These middleware are run during every request to your application.
-     *
-     * @var array<int, string>
      */
     protected array $middleware = [
+        // ... (middleware global tetap sama)
         // \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -25,8 +22,6 @@ class Kernel extends HttpKernel
 
     /**
      * The application's route middleware groups.
-     *
-     * @var array<string, array<int, string>>
      */
     protected array $middlewareGroups = [
         'web' => [
@@ -48,10 +43,6 @@ class Kernel extends HttpKernel
 
     /**
      * The application's route middleware aliases.
-     *
-     * These middleware may be assigned to groups or used individually.
-     *
-     * @var array<string, string>
      */
     protected array $middlewareAliases = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -62,6 +53,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
         
-        'role' => \App\Http\Middleware\RoleMiddleware::class, // <-- ALIAS ROLE DITAMBAHKAN DI SINI
+        // HILANGKAN ALIAS 'role' YANG MENYEBABKAN KONFLIK
     ];
 }

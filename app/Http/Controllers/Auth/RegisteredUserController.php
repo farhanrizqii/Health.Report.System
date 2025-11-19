@@ -41,10 +41,16 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Memberikan role_id default (Penting: Ganti 3 dengan ID role default yang benar)
+        $defaultRoleId = 3; 
+        $user->role_id = $defaultRoleId;
+        $user->save();
+        
         event(new Registered($user));
 
-        Auth::login($user);
+        // Hapus baris Auth::login($user); untuk mencegah login otomatis.
 
-        return redirect(route('dashboard', absolute: false));
+        // Mengarahkan user ke halaman login dengan pesan sukses.
+        return redirect(route('login'))->with('status', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
     }
 }

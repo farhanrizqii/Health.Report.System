@@ -17,7 +17,11 @@ use App\Http\Controllers\RiwayatKesehatanController;
 use App\Http\Controllers\LaporanKesehatanController; 
 
 // Import Controller Dashboard BARU
-use App\Http\Controllers\DashboardController; // <-- TAMBAH
+use App\Http\Controllers\DashboardController; 
+
+// Import Middleware Role
+use App\Http\Middleware\RoleMiddleware; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -29,51 +33,89 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes (Harus Login)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth')->group(function () {
     
-    // Dashboard Route (DIUBAH untuk menggunakan Controller)
-    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('verified')->name('dashboard'); // <-- PERUBAHAN DI SINI
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('verified')
+        ->name('dashboard');
 
-    // Profile Routes (Diakses oleh SEMUA user)
+    // Profile Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
+
     // ==========================================================
-    // --- GRUP 1: HANYA ADMIN (Manajemen Data Master Inti) ---
+    // --- GRUP 1: ADMIN - Manajemen Data Master Inti ---
     // ==========================================================
-    Route::middleware(['role:Admin'])->group(function () {
-        
-        // Data Wilayah (Master Geografis)
+    Route::middleware([RoleMiddleware::class . ':Admin'])->group(function () {
+
+        // --- ROUTE EKSPOR WILAYAH HARUS DI ATAS RESOURCE ---
+        Route::get('wilayah/export', [WilayahController::class, 'export'])
+            ->name('wilayah.export');
+
+        // Data Wilayah
         Route::resource('wilayah', WilayahController::class);
+
+
+        // --- ROUTE EKSPOR KATEGORI PENYAKIT HARUS DI ATAS RESOURCE ---
+        Route::get('kategori-penyakit/export', [KategoriPenyakitController::class, 'export'])
+            ->name('kategori-penyakit.export');
+
+        // Data Kategori Penyakit
+        Route::resource('kategori-penyakit', KategoriPenyakitController::class)
+            ->names(['index' => 'kategori-penyakit.index']);
+
         
-        // Data Master Kategori Penyakit
-        Route::resource('kategori-penyakit', KategoriPenyakitController::class)->names(['index' => 'kategori-penyakit.index']);
-        
-        // Data Master Fasilitas Kesehatan
-        Route::resource('fasilitas-kesehatan', FasilitasKesehatanController::class)->names(['index' => 'fasilitas-kesehatan.index']);
-        
-        // Data Master Kegiatan Posyandu
-        Route::resource('kegiatan-posyandu', KegiatanPosyanduController::class)->names(['index' => 'kegiatan-posyandu.index']);
+        // --- ROUTE EKSPOR FASILITAS KESEHATAN HARUS DI ATAS RESOURCE ---
+        Route::get('fasilitas-kesehatan/export', [FasilitasKesehatanController::class, 'export'])
+            ->name('fasilitas-kesehatan.export');
+
+        // Data Fasilitas Kesehatan
+        Route::resource('fasilitas-kesehatan', FasilitasKesehatanController::class)
+            ->names(['index' => 'fasilitas-kesehatan.index']);
+
+
+        // --- ROUTE EKSPOR KEGIATAN POSYANDU HARUS DI ATAS RESOURCE ---
+        Route::get('kegiatan-posyandu/export', [KegiatanPosyanduController::class, 'export'])
+            ->name('kegiatan-posyandu.export');
+
+        // Data Kegiatan Posyandu
+        Route::resource('kegiatan-posyandu', KegiatanPosyanduController::class)
+            ->names(['index' => 'kegiatan-posyandu.index']);
     });
-    
+
+
     // =========================================================================
-    // --- GRUP 2: ADMIN & PETUGAS KESEHATAN (Input Data & Manajemen Penduduk) ---
+    // --- GRUP 2: ADMIN & PETUGAS KESEHATAN (Input Data Penduduk & Transaksi) ---
     // =========================================================================
-    Route::middleware(['role:Admin,Petugas Kesehatan'])->group(function () {
-        
-        // Data Penduduk (Dasar)
+    Route::middleware([RoleMiddleware::class . ':Admin,Petugas Kesehatan'])->group(function () {
+
+        // --- ROUTE EKSPOR PENDUDUK HARUS DI ATAS RESOURCE ---
+        Route::get('penduduk/export', [PendudukController::class, 'export'])
+            ->name('penduduk.export');
+
+        // Data Penduduk
         Route::resource('penduduk', PendudukController::class);
-        
+
+        // --- ROUTE EKSPOR IMUNISASI HARUS DI ATAS RESOURCE ---
+        Route::get('imunisasi/export', [ImunisasiController::class, 'export'])
+            ->name('imunisasi.export');
+
         // Data Imunisasi
         Route::resource('imunisasi', ImunisasiController::class);
-        
+
+        // --- ROUTE EKSPOR IBU HAMIL HARUS DI ATAS RESOURCE ---
+        Route::get('ibu-hamil/export', [IbuHamilController::class, 'export'])
+            ->name('ibuhamil.export');
+
         // Data Ibu Hamil
         Route::resource('ibu-hamil', IbuHamilController::class)->names([
             'index' => 'ibuhamil.index',
@@ -84,14 +126,17 @@ Route::middleware('auth')->group(function () {
             'update' => 'ibuhamil.update',
             'destroy' => 'ibuhamil.destroy',
         ]);
-        
-        // Riwayat Pencatatan Penyakit Individu
-        Route::resource('riwayat-kesehatan', RiwayatKesehatanController::class)->names(['index' => 'riwayat-kesehatan.index']);
-        
-        // Laporan Kesehatan Induk/Detail (Dikecualikan edit/update)
-        Route::resource('laporan-kesehatan', LaporanKesehatanController::class)->except(['edit', 'update']);
 
-        // Anda dapat menambahkan batasan DELETE khusus di sini jika diperlukan
+        // Riwayat Kesehatan Individu
+        Route::resource('riwayat-kesehatan', RiwayatKesehatanController::class)
+            ->names(['index' => 'riwayat-kesehatan.index']);
+
+        // --- ROUTE EKSPOR LAPORAN KESEHATAN HARUS DI ATAS RESOURCE ---
+        Route::get('laporan-kesehatan/export', [LaporanKesehatanController::class, 'export'])
+            ->name('laporan-kesehatan.export');
+
+        // Laporan Kesehatan
+        Route::resource('laporan-kesehatan', LaporanKesehatanController::class);
     });
 
 });

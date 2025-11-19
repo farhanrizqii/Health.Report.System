@@ -19,7 +19,10 @@
                                 <option value="">-- Pilih Wilayah --</option>
                                 @foreach($wilayahs as $wilayah)
                                     <option value="{{ $wilayah->id }}" {{ old('wilayah_id') == $wilayah->id ? 'selected' : '' }}>
-                                        {{ $wilayah->nama_wilayah }}
+                                        {{ $wilayah->kelurahan }} 
+                                        @if ($wilayah->rw)
+                                            (RW: {{ $wilayah->rw }})
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
@@ -29,42 +32,33 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="nama_kegiatan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Kegiatan</label>
-                            <input type="text" name="nama_kegiatan" id="nama_kegiatan" value="{{ old('nama_kegiatan') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            @error('nama_kegiatan')
+                            <label for="jenis_kegiatan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama/Jenis Kegiatan</label>
+                            <input type="text" name="jenis_kegiatan" id="jenis_kegiatan" value="{{ old('jenis_kegiatan') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            @error('jenis_kegiatan')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="tanggal_kegiatan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Kegiatan</label>
-                            <input type="date" name="tanggal_kegiatan" id="tanggal_kegiatan" value="{{ old('tanggal_kegiatan') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            @error('tanggal_kegiatan')
+                            <label for="tanggal" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Kegiatan</label>
+                            <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            @error('tanggal')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="mb-4">
-                                <label for="waktu_mulai" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu Mulai (HH:MM)</label>
-                                <input type="text" name="waktu_mulai" id="waktu_mulai" value="{{ old('waktu_mulai') }}" placeholder="08:00" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                                @error('waktu_mulai')
-                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                            <div class="mb-4">
-                                <label for="waktu_selesai" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu Selesai (HH:MM)</label>
-                                <input type="text" name="waktu_selesai" id="waktu_selesai" value="{{ old('waktu_selesai') }}" placeholder="10:00" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                                @error('waktu_selesai')
-                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <div class="mb-4">
+                            <label for="jumlah_peserta" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jumlah Peserta (Opsional)</label>
+                            <input type="number" name="jumlah_peserta" id="jumlah_peserta" value="{{ old('jumlah_peserta') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            @error('jumlah_peserta')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="deskripsi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deskripsi Kegiatan (Opsional)</label>
-                            <textarea name="deskripsi" id="deskripsi" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">{{ old('deskripsi') }}</textarea>
-                            @error('deskripsi')
+                            <label for="keterangan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Keterangan Kegiatan (Opsional)</label>
+                            <textarea name="keterangan" id="keterangan" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">{{ old('keterangan') }}</textarea>
+                            @error('keterangan')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>

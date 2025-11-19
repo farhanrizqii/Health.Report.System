@@ -7,6 +7,7 @@ use App\Models\IbuHamil;
 use App\Models\RiwayatKesehatan;
 use App\Models\Wilayah;
 use App\Models\KategoriPenyakit; 
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;

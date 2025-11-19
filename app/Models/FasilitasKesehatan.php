@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+// Baris ini dihapus: use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FasilitasKesehatan extends Model
 {
-    use SoftDeletes;
+    // Hapus: use SoftDeletes;
     use HasFactory; 
 
     protected $table = 'fasilitas_kesehatan';
-    protected $guarded = []; // Mengizinkan semua kolom diisi (termasuk nama, alamat, dll.)
+    protected $guarded = []; // Mengizinkan semua kolom diisi
 
     // Laporan yang tercatat di fasilitas ini
     public function laporan()

@@ -8,35 +8,45 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LaporanKesehatan extends Model
 {
-    use SoftDeletes;
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     
     protected $table = 'laporan_kesehatan';
-    protected $guarded = [];
+    
+    protected $fillable = [
+        'user_id',
+        'fasilitas_kesehatan_id',
+        'jenis_kegiatan',
+        'deskripsi_laporan',
+        'tanggal_laporan',
+    ];
+    
+    protected $casts = [
+        'tanggal_laporan' => 'date',
+    ];
 
-    // Relasi Induk
+    // ===== RELASI =====
     public function fasilitas()
     {
         return $this->belongsTo(FasilitasKesehatan::class, 'fasilitas_kesehatan_id');
     }
+
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id'); // Petugas yang mencatat
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Relasi Detail (HAS MANY)
-    public function detailPenyakit() // Menggunakan camelCase
+    public function detailPenyakit()
     {
         return $this->hasMany(DetailPenyakit::class, 'laporan_kesehatan_id');
     }
+
     public function kegiatanPosyandu()
     {
-        // Asumsi Laporan Kesehatan ini adalah hasil/status dari suatu Kegiatan Posyandu
         return $this->hasMany(KegiatanPosyandu::class, 'laporan_id');
     }
+
     public function imunisasi()
     {
-        // Asumsi Imunisasi terkait dicatat dalam Laporan ini
         return $this->hasMany(Imunisasi::class, 'laporan_id');
     }
 }

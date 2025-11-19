@@ -29,24 +29,32 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="kategori_penyakit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Penyakit</label>
-                            <select name="kategori_penyakit_id" id="kategori_penyakit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            <label for="penyakit_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Penyakit</label>
+                            <select name="penyakit_id" id="penyakit_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
                                 <option value="">-- Pilih Jenis Penyakit --</option>
                                 @foreach($penyakits as $penyakit)
-                                    <option value="{{ $penyakit->id }}" {{ old('kategori_penyakit_id') == $penyakit->id ? 'selected' : '' }}>
+                                    <option value="{{ $penyakit->id }}" {{ old('penyakit_id') == $penyakit->id ? 'selected' : '' }}>
                                         {{ $penyakit->nama_penyakit }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('kategori_penyakit_id')
+                            @error('penyakit_id')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="jenis_pemeriksaan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Pemeriksaan/Diagnosa</label>
+                            <input type="text" name="jenis_pemeriksaan" id="jenis_pemeriksaan" value="{{ old('jenis_pemeriksaan', 'Diagnosa Umum') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            @error('jenis_pemeriksaan')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="mb-4">
-                            <label for="tanggal_tercatat" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Diagnosa/Tercatat</label>
-                            <input type="date" name="tanggal_tercatat" id="tanggal_tercatat" value="{{ old('tanggal_tercatat') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            @error('tanggal_tercatat')
+                            <label for="tanggal_pemeriksaan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Pemeriksaan</label>
+                            <input type="date" name="tanggal_pemeriksaan" id="tanggal_pemeriksaan" value="{{ old('tanggal_pemeriksaan') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                            @error('tanggal_pemeriksaan')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
@@ -73,7 +81,6 @@
                             @enderror
                         </div>
                         
-
                         <div class="flex justify-end mt-6">
                             <a href="{{ route('riwayat-kesehatan.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2">Batal</a>
                             <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Simpan Riwayat</button>

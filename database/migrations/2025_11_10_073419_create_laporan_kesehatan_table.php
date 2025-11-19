@@ -10,13 +10,16 @@ return new class extends Migration
     {
         Schema::create('laporan_kesehatan', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('penduduk_id')->constrained('penduduk')->cascadeOnDelete();
-            $table->foreignId('kategori_penyakit_id')->nullable()->constrained('kategori_penyakit');
-            $table->foreignId('fasilitas_kesehatan_id')->nullable()->constrained('fasilitas_kesehatan');
+            
+            $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
+            $table->foreignId('fasilitas_kesehatan_id')->constrained('fasilitas_kesehatan')->onDelete('restrict');
+            
+            $table->string('jenis_kegiatan');
+            $table->text('deskripsi_laporan');
             $table->date('tanggal_laporan');
-            $table->string('status')->default('aktif'); // aktif, sembuh, meninggal
-            $table->text('keterangan')->nullable();
+
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

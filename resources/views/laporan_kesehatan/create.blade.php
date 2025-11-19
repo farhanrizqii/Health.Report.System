@@ -10,6 +10,17 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
 
+                    @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                            <strong class="font-bold">Validasi Gagal!</strong>
+                            <span class="block sm:inline">Tolong periksa input berikut:</span>
+                            <ul class="mt-3 list-disc list-inside text-sm">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <form action="{{ route('laporan-kesehatan.store') }}" method="POST">
                         @csrf
                         
@@ -26,11 +37,12 @@
 
                             <div class="mb-4">
                                 <label for="fasilitas_kesehatan_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fasilitas Pencatat</label>
-                                <select name="fasilitas_kesehatan_id" id="fasilitas_kesehatan_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                                    <option value="">-- Pilih Fasilitas --</option>
+                                <select name="fasilitas_kesehatan_id" id="fasilitas_kesehatan_id" required 
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+                                    <option value="">-- Pilih Fasilitas Kesehatan --</option>
                                     @foreach($fasilitas as $f)
                                         <option value="{{ $f->id }}" {{ old('fasilitas_kesehatan_id') == $f->id ? 'selected' : '' }}>
-                                            {{ $f->nama_fasilitas }}
+                                            {{ $f->nama_faskes }} 
                                         </option>
                                     @endforeach
                                 </select>

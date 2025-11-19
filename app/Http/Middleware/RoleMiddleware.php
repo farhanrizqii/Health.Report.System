@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\Role; // <-- PERBAIKAN KRITIS: Menambahkan import Model Role
 
 class RoleMiddleware
 {
@@ -23,8 +24,7 @@ class RoleMiddleware
 
         $user = Auth::user();
         
-        // Asumsi model User memiliki relasi 'role' yang mengarah ke tabel Roles
-        // Jika relasi Anda bernama lain, sesuaikan di sini.
+        // Menggunakan nama kolom 'nama_role' yang benar dari Model Role
         $userRole = $user->role->nama_role; 
 
         // 2. Cek apakah role pengguna ada dalam daftar roles yang diizinkan
@@ -32,9 +32,7 @@ class RoleMiddleware
             return $next($request);
         }
 
-        // 3. Jika tidak diizinkan, arahkan ke halaman 403 (Unauthorized) atau dashboard
+        // 3. Jika tidak diizinkan, arahkan ke halaman 403 (Unauthorized)
         return response()->view('errors.403', [], 403);
-        
-        // Opsi lain: return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses.');
     }
 }

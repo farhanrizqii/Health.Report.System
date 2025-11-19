@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\Role; // <-- PERBAIKAN KRITIS: Import Model Role
 
 class AppServiceProvider extends ServiceProvider
 {
